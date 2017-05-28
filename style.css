@@ -1,0 +1,17 @@
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    height: 100%;
+}
+
+.ct-label {
+    font-family: Calibri;
+}
+
+.ct-chart {
+    height: 80%;
+    width: 70%;
+}
