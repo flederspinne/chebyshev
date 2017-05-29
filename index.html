@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="bower_components/chartist/dist/chartist.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="jquery-3.2.1.min.js"></script>
+    <script src="functions.js"></script>
 </head>
 <body>
 
@@ -14,54 +15,75 @@
 <div class="ct-chart ct-perfect-fourth" id="chart"></div>
 
 <script>
+
+    let options = {
+        // Don't draw the line chart points
+        // showPoint: false,
+    };
+    
     let x = [];
-    /* for(let i = -2; i <= 2; i++) {
-        x[i + 2] = i;
-    } */
-    let i = -1;
-    let counter = 0;
-    do {
-        x[counter] = i;
-        i += 0.1;
-        counter++;
-    } while (i <= 1);
 
-    document.write(JSON.stringify(x));
+    x_axis(x, -1, 1, 0.01);
 
-    document.write("<br>");
+    document.write("<br>" + x);
 
     let y = [];
     for (let j = 0; j < x.length; j++) {
-        y[j] = 2 * Math.pow(x[j], 2) - 1; // 2 степень
-        // y[j] = 4 * Math.pow(x[j], 3) - 3 * x[j]; // 3 степень
-    }
-
-
-    document.write(JSON.stringify(y));
-
-    let w = [];
-
-    for (let j = 0; j < x.length; j++) {
-        // y[j] = 2 * Math.pow(x[j], 2) - 1; // 2 степень
-        w[j] = 4 * Math.pow(x[j], 3) - 3 * x[j]; // 3 степень
-    }
-
-    let z = [];
-
-    for (let j = 0; j < x.length; j++) {
-        // y[j] = 2 * Math.pow(x[j], 2) - 1; // 2 степень
-        // w[j] = 4 * Math.pow(x[j], 3) - 3 * x[j]; // 3 степень
-        z[j] = 8 * Math.pow(x[j], 4) - 8 * Math.pow(x[j], 2) + 1; // 4 степень
+        y[j] = cheb(x[j], 4);
     }
 
     let data = {
         labels: x,
         series: [
-            y, w, z
+            y
         ]
     };
 
-    new Chartist.Line('#chart', data);
+    let chart = new Chartist.Line('#chart', data, options);
+
+    // Let's put a sequence number aside so we can use it in the event callbacks
+    var seq = 0;
+
+    // Once the chart is fully created we reset the sequence
+    chart.on('created', function() {
+        seq = 0;
+    });
+
+    // On each drawn element by Chartist we use the Chartist.Svg API to trigger SMIL animations
+    chart.on('draw', function(data) {
+        if(data.type === 'point') {
+            // If the drawn element is a line we do a simple opacity fade in. This could also be achieved using CSS3 animations.
+            data.element.animate({
+                opacity: {
+                    // The delay when we like to start the animation
+                    begin: seq++ * 80,
+                    // Duration of the animation
+                    dur: 500,
+                    // The value where the animation should start
+                    from: 0,
+                    // The value where it should end
+                    to: 1
+                },
+                x1: {
+                    begin: seq++ * 80,
+                    dur: 500,
+                    from: data.x - 100,
+                    to: data.x,
+                    // You can specify an easing function name or use easing functions from Chartist.Svg.Easing directly
+                    easing: Chartist.Svg.Easing.easeOutQuart
+                }
+            });
+        }
+    });
+
+    // For the sake of the example we update the chart every time it's created with a delay of 8 seconds
+    chart.on('created', function() {
+        if(window.__anim0987432598723) {
+            clearTimeout(window.__anim0987432598723);
+            window.__anim0987432598723 = null;
+        }
+        // window.__anim0987432598723 = setTimeout(chart.update.bind(chart), 8000);
+    });
 
 </script>
 

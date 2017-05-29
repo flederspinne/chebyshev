@@ -13,5 +13,12 @@ body {
 
 .ct-chart {
     height: 80%;
-    width: 70%;
+    width: 90%;
+}
+
+.ct-series-a .ct-line {
+    /* Set the colour of this series line */
+    stroke: orange;
+    /* Control the thikness of your lines */
+    stroke-width: 3px;
 }
