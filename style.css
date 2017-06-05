@@ -1,6 +1,6 @@
 html {
     height: 100%;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 body {
@@ -18,7 +18,7 @@ body {
 
 .ct-series-a .ct-line {
     /* Set the colour of this series line */
-    stroke: orange;
+    /* stroke: orange; */
     /* Control the thikness of your lines */
-    stroke-width: 3px;
+    stroke-width: 2px;
 }

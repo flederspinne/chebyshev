@@ -15,75 +15,72 @@
 <div class="ct-chart ct-perfect-fourth" id="chart"></div>
 
 <script>
+    // Порядок исследуемых полиномов
+    const DEGREE = 2;
 
     let options = {
-        // Don't draw the line chart points
-        // showPoint: false,
+        // Не рисовать отдельные точки на графике
+        showPoint: false,
+        // Настройки оси Х
+        axisX: {
+            // Не показывать наименования
+            showLabel: false
+        }
     };
-    
+
+    // 1. Делим [-1; 1] на 1000 частей.
     let x = [];
+    x_axis(x, -1, 1, 0.002);
 
-    x_axis(x, -1, 1, 0.01);
-
-    document.write("<br>" + x);
-
+    // 2. В каждой из точек, полученных в п.1, вычисляем значение полинома Чебышёва порядка DEGREE.
     let y = [];
     for (let j = 0; j < x.length; j++) {
-        y[j] = cheb(x[j], 4);
+        y[j] = cheb(x[j], DEGREE);
     }
 
+    // 3. Вычисляем модуль каждого значения, полученного в п.2.
+    let y_abs = [];
+    y_abs = get_abs_of_array(y, y_abs);
+
+    let rand_pol_arr = [];
+    let abs_pol_arr = [];
+    for (let i = 0; i < 5; i++) {
+        rand_pol_arr[i] = [];
+        abs_pol_arr[i] = [];
+
+        // 4. Генерируем 100 многочленов порядка m со старшим коэффициентом, равным 1
+        // (все остальные коэффициенты - случайные).
+        // 5. В каждой из точек, полученных в п.1, вычисляем значение этих 100 многочленов.
+        let coeff_arr = make_coeff(1, 2);
+
+        for (let j = 0; j < x.length; j++) {
+            rand_pol_arr[i][j] = generate_polynomial(x[j], DEGREE, coeff_arr);
+        }
+
+        // 6. Вычисляем модуль каждого значения, полученного в п.5.
+        abs_pol_arr[i] = get_abs_of_array(rand_pol_arr[i], abs_pol_arr[i]);
+
+        // 7. Находим максимум среди значений, полученных в п.3.
+        let y_max = get_max_of_array(y_abs);
+
+        // 8. Находим максимум среди значений, полученных в п.6.
+        let local_max = get_max_of_array(abs_pol_arr[i]);
+
+        // 9. Проверяем, действительно ли значение из п.7 меньше, чем значение из п.8.
+        if (local_max <= y_max) {
+            document.writeln("<br>Гипотеза неверна!" + local_max);
+        }
+    }
+
+    // В качестве примера выводим один из случайных полиномов и полином Чебышёва.
     let data = {
         labels: x,
         series: [
-            y
+            rand_pol_arr[4], y
         ]
     };
 
     let chart = new Chartist.Line('#chart', data, options);
-
-    // Let's put a sequence number aside so we can use it in the event callbacks
-    var seq = 0;
-
-    // Once the chart is fully created we reset the sequence
-    chart.on('created', function() {
-        seq = 0;
-    });
-
-    // On each drawn element by Chartist we use the Chartist.Svg API to trigger SMIL animations
-    chart.on('draw', function(data) {
-        if(data.type === 'point') {
-            // If the drawn element is a line we do a simple opacity fade in. This could also be achieved using CSS3 animations.
-            data.element.animate({
-                opacity: {
-                    // The delay when we like to start the animation
-                    begin: seq++ * 80,
-                    // Duration of the animation
-                    dur: 500,
-                    // The value where the animation should start
-                    from: 0,
-                    // The value where it should end
-                    to: 1
-                },
-                x1: {
-                    begin: seq++ * 80,
-                    dur: 500,
-                    from: data.x - 100,
-                    to: data.x,
-                    // You can specify an easing function name or use easing functions from Chartist.Svg.Easing directly
-                    easing: Chartist.Svg.Easing.easeOutQuart
-                }
-            });
-        }
-    });
-
-    // For the sake of the example we update the chart every time it's created with a delay of 8 seconds
-    chart.on('created', function() {
-        if(window.__anim0987432598723) {
-            clearTimeout(window.__anim0987432598723);
-            window.__anim0987432598723 = null;
-        }
-        // window.__anim0987432598723 = setTimeout(chart.update.bind(chart), 8000);
-    });
 
 </script>
 
